@@ -1,27 +1,36 @@
-const Discord = require('discord.js');
+const Discord = require ('discord.js');
 
 module.exports = {
 	name: 'about',
 	description: 'Displays bot information',
 	cooldown: 5,
 	execute(message) {
+		const uptime = process.uptime();
+		const days = Math.floor(uptime / 60 / 60 / 24), hours = Math.floor(uptime / 60 / 60 % 24), minutes = Math.floor(uptime / 60 % 60), seconds = Math.floor(uptime % 61);
+		const daysStr = `${days.toLocaleString()}d`, hoursStr = `${hours.toLocaleString()}h`, minutesStr = `${minutes.toLocaleString()}m`, secondsStr = `${seconds.toLocaleString()}s`;
+		const time = `${days > 0 ? `${daysStr} ` : ''} ${hours > 0 ? `${hoursStr} ` : ''} ${minutesStr} ${secondsStr}`;
 		const embed = new Discord.MessageEmbed()
 			.setColor('#00ADFF')
-			.setTitle('Some title')
-			.setURL('https://discord.js.org/')
-			.setAuthor('Some name', 'https://i.imgur.com/wSTFkRM.png', 'https://discord.js.org')
-			.setDescription('Guten Tag. I am combat T-doll, G36. It is my honour to be of assistance to you, Master.')
+			.setAuthor('G36', 'https://cdn.discordapp.com/avatars/696026584142053458/17f1ccd506b9d45de31481a70c22b8de.png?size=128')
+			.setDescription('Guten Tag. I am combat T-doll, **G36**. It is my honour to be of assistance to you, Master.')
 			.setThumbnail('https://cdn.discordapp.com/avatars/696026584142053458/17f1ccd506b9d45de31481a70c22b8de.png?size=128')
 			.addFields(
-				{ name: 'Regular field title', value: 'Some value here' },
-				{ name: '\u200B', value: '\u200B' },
-				{ name: 'Inline field title', value: 'Some value here', inline: true },
-				{ name: 'Inline field title', value: 'Some value here', inline: true },
+				{
+					name: 'Current Status:',
+					value: `I have been active for **${time}** and am currently serving **${message.client.guilds.cache.size} servers**. If you have requests please let me know, I believe in your judgements.` },
+				{
+					name: 'Useful Links',
+					value: '<:GitHub:696235088819519549> [GitHub Repository](https://github.com/Cyhne/G36-Bot)\n:book: [Wikipedia](https://en.wikipedia.org/wiki/Heckler_%26_Koch_G36)',
+					inline: true
+				},
+				{
+					name: '\u200b',
+					value: '<:GK:696237243223769178> [GFLWiki](https://en.gfwiki.com/wiki/G36)',
+					inline: true
+				}
 			)
-			.addField('Inline field title', 'Some value here', true)
-			.setImage('https://i.imgur.com/wSTFkRM.png')
 			.setTimestamp()
-			.setFooter('Some footer text here', 'https://i.imgur.com/wSTFkRM.png');
+			.setFooter('Cyhne#0036');
 
 		message.channel.send(embed);
 	},

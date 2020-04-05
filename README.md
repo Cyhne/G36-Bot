@@ -1,2 +1,2 @@
 # G36-Bot
-Combat T-doll, G36 ready to perform discord related tasks
+I am combat t-doll, G36. I am ready to perform any tasks needed of me, master.

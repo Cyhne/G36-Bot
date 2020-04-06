@@ -26,8 +26,18 @@ module.exports = {
 					inline: true,
 				},
 				{
+					name: '__Do Not Disturb__',
+					value: `**${message.guild.members.cache.filter(member => member.presence.status === 'dnd').size}**`,
+					inline: true,
+				},
+				{
 					name: '__Offline Members__',
 					value: `**${message.guild.members.cache.filter(member => member.presence.status === 'offline').size}**`,
+					inline: true,
+				},
+				{
+					name: '\u200b',
+					value: '\u200b',
 					inline: true,
 				},
 				{

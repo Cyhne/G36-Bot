@@ -1,98 +1,90 @@
-const fs = require('fs');
 const Discord = require('discord.js');
-const { prefix, token } = require('./config.json');
-const cron = require('cron').CronJob;
-
 const client = new Discord.Client();
-const cooldowns = new Discord.Collection();
+const fs = require('fs');
+
+const { prefix, token } = require('./config.json');
 
 client.commands = new Discord.Collection();
+client.aliases = new Discord.Collection();
+const cooldowns = new Discord.Collection();
 
-const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
+const escapeRegex = str => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-for(const file of commandFiles)
-{
-	const command = require(`./commands/${file}`);
-	client.commands.set(command.name, command);
-}
+const modules = ['administrator', 'dev', 'general', 'mentions', 'schedule'];
 
-client.once('ready', () =>
-{
-	console.log('System Ready... G36 initialized.');
+modules.forEach(c => {
+	fs.readdir(`./commands/${c}`, (error, files) => {
+		if(error) throw error;
+		console.log(`[Commandlogs] Loaded ${files.length} commands of module ${c}`);
+		files.forEach(f => {
+			const props = require(`./commands/${c}/${f}`);
+			client.commands.set(props.help.name, props);
+			props.conf.aliases.forEach(aliases => {
+				client.aliases.set(aliases, props.name);
+			});
+		});
+	});
 });
 
-const job = new cron('0 0 9 * * *', () =>{
-	client.channels.cache.get('677558213251563522').send('Guten Morgen, commanders. It looks like today will be another busy day.');
+client.once('ready', () => {
+	console.log('System Ready... G36 Initialized.');
+	client.commands.get('morning').run(client);
+	client.commands.get('afternoon').run(client);
+	client.commands.get('evening').run(client);
 });
 
-const job2 = new cron('0 0 15 * * *', () => {
-	client.channels.cache.get('677558213251563522').send('Guten Tag, commanders. Are you maintaining yourselves? Don\'t forget to eat something.');
-});
-
-const job3 = new cron('0 0 21 * * *', () => {
-	client.channels.cache.get('677558213251563522').send('Guten Nacht, commanders. Thank you for working so hard. Please leave the clean up to me.');
-});
-
-job.start();
-job2.start();
-job3.start();
-
-client.on('message', message =>
-{
-	if(message.content === 'Good night everyone.' || message.content === 'nn everyone' || message.content === 'gn everyone')
-	{
-		message.reply('Sweet dreams, master.');
+client.on('message', message => {
+	if(message.content.includes('gn everyone') || message.content.includes('nn everyone') || message.content.includes('Good night everyone')) {
+		message.replay('Good night, Master.');
 	}
+	const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`);
+	if (!prefixRegex.test(message.content) || message.author.bot) return;
 
-	if(!message.content.startsWith(prefix) || message.author.bot) return;
-
-	const args = message.content.slice(prefix.length).split(/ +/);
+	const [, matchedPrefix] = message.content.match(prefixRegex);
+	const args = message.content.slice(matchedPrefix.length).trim().split(/ +/);
 	const commandName = args.shift().toLowerCase();
-
-	const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+	const command = client.commands.get(commandName) || client.commands.find(cmd => cmd.conf.aliases && cmd.conf.aliases.includes(commandName));
 
 	if(!command) return;
 
 	// Guild Only commands
-	if(command.guildOnly && message.channel.type !== 'text') {
+	if(command.conf.guildOnly && message.channel.type !== 'text') {
 		return message.reply('I can\'t execute that command inside DMs!');
 	}
 
 	// Proper documentation
-	if(command.args && !args.length) {
+	if(command.conf.args && !args.length) {
 		let reply = `You didn't provide any arguments, ${message.author}!`;
-		if(command.usage) {
-			reply += `\nThe proper usage should be: \`${prefix}${command.name} ${command.usage}\``;
+		if(command.help.usage) {
+			reply += `\nThe proper usage should be: \`${prefix}${command.help.name} ${command.help.usage}\``;
 		}
 		return message.channel.send(reply);
 	}
 
 	// COOLDOWN
-	if(!cooldowns.has(command.name)) {
-		cooldowns.set(command.name, new Discord.Collection());
+	if(!cooldowns.has(command.help.name)) {
+		cooldowns.set(command.help.name, new Discord.Collection());
 	}
 
 	const now = Date.now();
-	const timestamps = cooldowns.get(command.name);
-	const cooldownAmount = (command.cooldown || 3) * 1000;
+	const timestamps = cooldowns.get(command.help.name);
+	const cooldownAmount = (command.conf.cooldown || 3) * 1000;
 
 	if(timestamps.has(message.author.id)) {
 		const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
 		if (now < expirationTime) {
 			const timeLeft = (expirationTime - now) / 1000;
-			return message.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
+			return message.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.help.name}\` command.`);
 		}
 	}
 
-	// Run Command
-	try{
-		command.execute(message, args);
+	try {
+		command.run(message, args);
 	}
 	catch (error) {
 		console.error(error);
-		message.reply('There was an error trying to execute that command!');
+		message.reply('there was an error trying to execute that command!');
 	}
-
 });
 
 client.login(token);

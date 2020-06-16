@@ -42,7 +42,7 @@ exports.conf = {
 exports.help = {
 	name: 'about',
 	description: 'Displays information about this bot',
-	usage: '!about',
-	example: '!about',
+	usage: '~about',
+	example: '~about',
 	category: 'general',
 };

@@ -72,6 +72,7 @@ exports.conf = {
 exports.help = {
 	name: 'help',
 	description: 'Provides a list of commands and information about specific commands',
-	usage: '!help (command name)',
+	usage: '~help (command name)',
+	example: '~help help',
 	category: 'Misc',
 };

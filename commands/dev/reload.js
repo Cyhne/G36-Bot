@@ -40,7 +40,7 @@ exports.conf = {
 exports.help = {
 	name: 'reload',
 	description: 'Reloads a command | **OWNER ONLY**',
-	usage: '!reload <command>',
-	example: '!reload help',
+	usage: '~reload <command>',
+	example: '~reload help',
 	category: 'developer',
 };

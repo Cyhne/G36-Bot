@@ -23,7 +23,7 @@ exports.conf = {
 exports.help = {
 	name: 'prune',
 	description: 'Deletes a specified amount of messages | **REQUIRES MANAGE MESSAGES**',
-	usage: '!prune <amount>',
-	example: '!prune 50',
+	usage: '~prune <amount>',
+	example: '~prune 50',
 	category: 'administrator',
 };

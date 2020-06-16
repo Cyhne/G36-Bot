@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 const fs = require('fs');
 
-const { prefix, token } = require('./config.json');
+const { prefix, token, channel_id} = require('./config.json');
 
 client.commands = new Discord.Collection();
 client.aliases = new Discord.Collection();
@@ -31,11 +31,17 @@ client.once('ready', () => {
 	client.commands.get('morning').run(client);
 	client.commands.get('afternoon').run(client);
 	client.commands.get('evening').run(client);
+	client.commands.get('birthday').run(client);
+	client.commands.get('anniversary').run(client);
 });
+
+client.on('guildMemberAdd', member => {
+	member.guild.channels.cache.find(channel => channel.name === 'general').send(`Welcome ${member.user}. I am this server's maid, please do not hesitate to call upon me.`)
+})
 
 client.on('message', message => {
 	if(message.content.includes('gn everyone') || message.content.includes('nn everyone') || message.content.includes('Good night everyone')) {
-		message.replay('Good night, Master.');
+		message.reply('Good night, Master.');
 	}
 	const prefixRegex = new RegExp(`^(<@!?${client.user.id}>|${escapeRegex(prefix)})\\s*`);
 	if (!prefixRegex.test(message.content) || message.author.bot) return;
@@ -56,7 +62,7 @@ client.on('message', message => {
 	if(command.conf.args && !args.length) {
 		let reply = `You didn't provide any arguments, ${message.author}!`;
 		if(command.help.usage) {
-			reply += `\nThe proper usage should be: \`${prefix}${command.help.name} ${command.help.usage}\``;
+			reply += `\nThe proper usage should be: \`${command.help.usage}\``;
 		}
 		return message.channel.send(reply);
 	}

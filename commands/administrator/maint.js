@@ -31,7 +31,7 @@ exports.conf = {
 exports.help = {
 	name: 'maint',
 	description: 'Sets an alarm for when maintenance ends.',
-	usage: '!maint <month> <day>',
-	example: '!maint 4 9 %%sets alarm on April 9th%%',
+	usage: '~maint <month> <day>',
+	example: '~maint 4 9 %%sets alarm on April 9th%%',
 	category: 'administrator',
 };
